@@ -40,7 +40,7 @@ OF SUCH DAMAGE.
 #include <stdio.h>
 #include "main.h"
 #include "gd32f303e_eval.h"
-
+#include "gpio.h"
 /*!
     \brief      toggle the led every 500ms
     \param[in]  none
@@ -90,12 +90,7 @@ int main(void)
     printf("\r\nCK_APB2 is %d", rcu_clock_freq_get(CK_APB2));
 
     while (1){
-        if(RESET == gd_eval_key_state_get(KEY_WAKEUP)){
-            gd_eval_led_on(LED3);
-            delay_1ms(500);
-            gd_eval_led_off(LED3);
-            gd_eval_led_toggle(LED4);
-        }
+        blink_led_gd32();
     }
 }
 
