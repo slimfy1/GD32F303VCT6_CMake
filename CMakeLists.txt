@@ -57,7 +57,7 @@ file(GLOB_RECURSE LIB_SOURCES
 include_directories(Libraries/MyLib)
 
 # Set linker script
-set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/GD32F303VE_DEFAULT.ld)
+set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/GD32F303VETx_FLASH.ld)
 
 # Linker options
 add_link_options(
