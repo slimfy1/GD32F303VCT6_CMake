@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file      startup_gd32f303_hd.s
   * @author    MCD Application Team
-  * @brief     STM32F407xx Devices vector table for GCC based toolchains.
+  * @brief     GD32F303xx Devices vector table for GCC based toolchains.
   *            This module performs:
   *                - Set the initial SP
   *                - Set the initial PC == Reset_Handler,
