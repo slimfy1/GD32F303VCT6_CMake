@@ -84,10 +84,10 @@ int main(void)
     gd_eval_key_init(KEY_WAKEUP, KEY_MODE_GPIO);
     
     /* print out the clock frequency of system, AHB, APB1 and APB2 */
-    printf("\r\nCK_SYS is %d", rcu_clock_freq_get(CK_SYS));
-    printf("\r\nCK_AHB is %d", rcu_clock_freq_get(CK_AHB));
-    printf("\r\nCK_APB1 is %d", rcu_clock_freq_get(CK_APB1));
-    printf("\r\nCK_APB2 is %d", rcu_clock_freq_get(CK_APB2));
+    //printf("\r\nCK_SYS is %d", rcu_clock_freq_get(CK_SYS));
+    //printf("\r\nCK_AHB is %d", rcu_clock_freq_get(CK_AHB));
+    //printf("\r\nCK_APB1 is %d", rcu_clock_freq_get(CK_APB1));
+    //printf("\r\nCK_APB2 is %d", rcu_clock_freq_get(CK_APB2));
 
     while (1){
         blink_led_gd32();

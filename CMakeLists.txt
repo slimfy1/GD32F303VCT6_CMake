@@ -14,27 +14,30 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 # Project config
 project(GD32F303VE_CMake C CXX ASM)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 
 # Compiler options
 add_compile_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)
 add_compile_options(-ffunction-sections -fdata-sections -fno-common -fmessage-length=0)
-# Uncomment for hardware floating point
-#add_compile_definitions(ARM_MATH_CM4;ARM_MATH_MATRIX_CHECK;ARM_MATH_ROUNDING)
-#add_compile_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
-#add_link_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
+
+# Hardware floating point
+add_compile_definitions(ARM_MATH_CM4;ARM_MATH_MATRIX_CHECK;ARM_MATH_ROUNDING)
+add_compile_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
+add_link_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
+
 
 # Uncomment for software floating point
-add_compile_options(-mfloat-abi=soft)
+#add_compile_options(-mfloat-abi=soft)
 
 # Assembler options
 add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
 
-# Optimization settings
+# Optimization settings (O2 Release, O0 Debug)
 add_compile_options(-O0 -g)
 
-# Директории для включаемых файлов
+# Include directories
 include_directories(
         include
         Drivers/CMSIS/Core/Include
@@ -46,15 +49,20 @@ include_directories(
 # Project macros and defines
 add_definitions(-DDEBUG -DGD32F303 -DGD32F30x -DGD32F30X_HD)
 
+# Startup file (исходный файл, который содержит Reset_Handler)
+set(STARTUP_FILE "Drivers/CMSIS/Device/GD/GD32F30x/Source/startup_gd32f303xe.s")
+
 # Set global sources
 file(GLOB_RECURSE SOURCES
-        "src/*.*"
-        "Drivers/*.*")
-# Add libraries
-file(GLOB_RECURSE LIB_SOURCES
-        "Library/GPIO/*.c"
+        "src/*.c"
+        "Drivers/**/*.c"
 )
-include_directories(Libraries/MyLib)
+
+
+# Additional libraries
+file(GLOB_RECURSE LIB_SOURCES
+        "Library/GPIO/gpio.c"
+)
 
 # Set linker script
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/GD32F303VETx_FLASH.ld)
@@ -69,14 +77,19 @@ add_link_options(
         -T ${LINKER_SCRIPT}
 )
 
-# Set exe file
-add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LIB_SOURCES} ${LINKER_SCRIPT})
+# Executable target (порядок: Startup → FreeRTOS → библиотеки → основной код)
+add_executable(${PROJECT_NAME}.elf
+        ${STARTUP_FILE}
+        ${FREERTOS_SOURCES}
+        ${LIB_SOURCES}
+        ${SOURCES}
+)
 
 # Path to HEX and BIN
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
 set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)
 
-# Commant to create HEX and BIN
+# Command to create HEX and BIN
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
         COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
