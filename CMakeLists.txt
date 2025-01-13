@@ -50,7 +50,7 @@ include_directories(
 add_definitions(-DDEBUG -DGD32F303 -DGD32F30x -DGD32F30X_HD)
 
 # Startup file (исходный файл, который содержит Reset_Handler)
-set(STARTUP_FILE "Drivers/CMSIS/Device/GD/GD32F30x/Source/startup_gd32f303xe.s")
+set(STARTUP_FILE "Drivers/CMSIS/Device/GD/GD32F30x/Source/startup_gd32f303_hd.s")
 
 # Set global sources
 file(GLOB_RECURSE SOURCES
