@@ -14,24 +14,24 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 # project settings
 project(GD32F303VE_CMake C CXX ASM)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 
-# Compiler options
+#Uncomment for hardware floating point
+#add_compile_definitions(ARM_MATH_CM4;ARM_MATH_MATRIX_CHECK;ARM_MATH_ROUNDING)
+#add_compile_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
+#add_link_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
+
+#Uncomment for software floating point
+add_compile_options(-mfloat-abi=soft)
+
 add_compile_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)
 add_compile_options(-ffunction-sections -fdata-sections -fno-common -fmessage-length=0)
 
-# Hardware floating point
-add_compile_definitions(ARM_MATH_CM4;ARM_MATH_MATRIX_CHECK;ARM_MATH_ROUNDING)
-add_compile_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
-add_link_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
+# uncomment to mitigate c++17 absolute addresses warnings
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-register")
 
-
-# Uncomment for software floating point
-#add_compile_options(-mfloat-abi=soft)
-
-# Assembler options
+# Enable assembler files preprocessing
 add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
@@ -60,7 +60,7 @@ include_directories(
 # Project macros and defines
 add_definitions(-DDEBUG -DGD32F303 -DGD32F30x -DGD32F30X_HD)
 
-# Startup file (исходный файл, который содержит Reset_Handler)
+# Startup file
 set(STARTUP_FILE "Drivers/CMSIS/Device/GD/GD32F30x/Source/startup_gd32f303_hd.s")
 
 # Set global sources
@@ -68,7 +68,6 @@ file(GLOB_RECURSE SOURCES
         "src/*.c"
         "Drivers/**/*.c"
 )
-
 
 # Additional libraries
 file(GLOB_RECURSE LIB_SOURCES
@@ -78,31 +77,22 @@ file(GLOB_RECURSE LIB_SOURCES
 # Set linker script
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/GD32F303VETx_FLASH.ld)
 
-# Linker options
-add_link_options(
-        -Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map
-        -mcpu=cortex-m4 -mthumb -mthumb-interwork
-        -Wl,--no-warn-rwx-segments
-        -specs=nano.specs -lc -lgcc -lm -lrdimon
-        -specs=nosys.specs
-        -T ${LINKER_SCRIPT}
-)
+add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map)
+add_link_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)
+add_link_options(-Wl,--no-warn-rwx-segments)
+# Nanolibnew
+add_link_options(-specs=nano.specs -lc -lgcc -lm -lrdimon)
+add_link_options(-specs=nosys.specs)
 
-# Executable target (порядок: Startup → FreeRTOS → библиотеки → основной код)
-add_executable(${PROJECT_NAME}.elf
-        ${STARTUP_FILE}
-        ${FREERTOS_SOURCES}
-        ${LIB_SOURCES}
-        ${SOURCES}
-)
+add_link_options(-T ${LINKER_SCRIPT})
 
-# Path to HEX and BIN
+add_executable(${PROJECT_NAME}.elf ${STARTUP_FILE} ${LIB_SOURCES} ${SOURCES} ${LINKER_SCRIPT})
+
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
 set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)
 
-# Command to create HEX and BIN
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
         COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
-        COMMENT "Building ${HEX_FILE} and ${BIN_FILE}"
-)
+        COMMENT "Building ${HEX_FILE}
+Building ${BIN_FILE}")
