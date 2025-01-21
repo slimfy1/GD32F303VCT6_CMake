@@ -34,8 +34,19 @@ add_link_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
 # Assembler options
 add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
 
-# Optimization settings (O2 Release, O0 Debug)
-add_compile_options(-O0 -g)
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    message(STATUS "Maximum optimization for speed")
+    add_compile_options(-Ofast)
+elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    message(STATUS "Maximum optimization for speed, debug info included")
+    add_compile_options(-Ofast -g)
+elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "MinSizeRel")
+    message(STATUS "Maximum optimization for size")
+    add_compile_options(-Os)
+else ()
+    message(STATUS "Minimal optimization, debug info included")
+    add_compile_options(-Og -g)
+endif ()
 
 # Include directories
 include_directories(
