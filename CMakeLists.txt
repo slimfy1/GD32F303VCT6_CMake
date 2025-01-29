@@ -36,18 +36,18 @@ add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     message(STATUS "Maximum optimization for speed")
-    add_compile_options(-Ofast)
+    add_compile_options(-Ofast -flto)
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
     message(STATUS "Maximum optimization for speed, debug info included")
-    add_compile_options(-Ofast -g)
+    add_compile_options(-Os -g -flto)
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "MinSizeRel")
     message(STATUS "Maximum optimization for size")
-    add_compile_options(-Os)
+    add_compile_options(-Os -flto)
 else ()
     message(STATUS "Minimal optimization, debug info included")
-    add_compile_options(-Og -g)
+    add_compile_options(-Og -g -flto)
+    add_compile_definitions(NO_IWDG_INIT) # Add macro for Debug
 endif ()
-
 # Include directories
 include_directories(
         include
@@ -82,7 +82,9 @@ add_link_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)
 add_link_options(-Wl,--no-warn-rwx-segments)
 # Nanolibnew
 add_link_options(-specs=nano.specs -lc -lgcc -lm -lrdimon)
-add_link_options(-specs=nosys.specs)
+
+# Picolibs
+#add_link_options(-specs=picolibc.specs -lc -lgcc -lm -lrdimon)
 
 add_link_options(-T ${LINKER_SCRIPT})
 
