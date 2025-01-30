@@ -37,6 +37,9 @@ OF SUCH DAMAGE.
 
 #ifndef SYS_TICK_H
 #define SYS_TICK_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdint.h>
 
@@ -46,5 +49,9 @@ void systick_config(void);
 void delay_1ms(uint32_t count);
 /* delay decrement */
 void delay_decrement(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SYS_TICK_H */
